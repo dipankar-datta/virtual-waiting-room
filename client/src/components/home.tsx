@@ -1,12 +1,13 @@
 import React from 'react';
+import '../App.css';
 
 export default class Home extends React.Component<any, any> {
   
   render() {
     return (
-      <h2 >
-          Home Component
-      </h2>
+      <div className="horizontal-center">
+        <h2></h2>
+      </div>
     );
   }
 }

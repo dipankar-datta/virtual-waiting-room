@@ -10,7 +10,7 @@ export default class App extends React.Component<any, any> {
   render() {
     return (
       <div >
-          <h2>Virtual Waiting Room</h2>
+          <div className='horizontal-center'><h2>Virtual Waiting Room</h2></div>
           <Switch>
             <Route path="/" exact component={Home} />
             <Route path="/wait" component={WaitingRoom} />
