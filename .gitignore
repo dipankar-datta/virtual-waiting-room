@@ -143,5 +143,5 @@ Desktop.ini
 .eslintcache
 
 # For resources generated for packaging
-src/main/resources/public/
-src/main/resources/static/
+#src/main/resources/public/
+#src/main/resources/static/
