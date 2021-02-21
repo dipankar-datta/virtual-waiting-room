@@ -39,6 +39,7 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
     const query = new URLSearchParams(this.props.location.search);
     let redirectInfo: any = query.get('redirectInfo');
     if (redirectInfo) {
+      redirectInfo = atob(redirectInfo);
       redirectInfo = JSON.parse(redirectInfo);
     }
     const redirectUrl =  redirectInfo['redirectUrl'];
