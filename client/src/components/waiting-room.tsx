@@ -91,28 +91,31 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
   render() {    
   
     return (
-      <div >
-          <h2>Your requested application is currently facing excessive load.</h2>
-          <h2>Your requested application URL: {this.state.redirectUrl}</h2>          
-          <div className='horizontal-center'>
+      <div>
+          <div>
+            <h3>Resource Busy</h3>
+            <p>Your requested application is currently busy. Once the requested application is available, you will be redirected back.</p>
+          </div>
+          <h6>Requested application URL: {this.state.redirectUrl}</h6>          
+          <div className='horizontal-center' style={{padding: "20px"}}>
             <div className='horizontal-center'>
-            <button  style={{fontSize: "16px"}} onClick={this.redirectBack} >Go Back</button> &nbsp;&nbsp;
+            <button type="button" className="btn btn-danger" onClick={this.redirectBack} >Go Back</button> &nbsp;&nbsp;
 
             {
               this.state.rechecking ? 
-              <button  style={{fontSize: "16px"}} onClick={this.stopRecheck} >Stop Recheck</button>
+              <button  type="button" className="btn btn-danger" onClick={this.stopRecheck} >Stop Recheck</button>
               :
-              <button  style={{fontSize: "16px"}} onClick={this.startRecheck} >Start Recheck</button>
+              <button  type="button" className="btn btn-danger" onClick={this.startRecheck} >Start Recheck</button>
             }
             
             </div>
             
             <div className='horizontal-center'>
-              <label>Just for demonstration</label>
+              <h6>Only for demonstration</h6>
             </div>            
           </div>       
           {this.state.rechecking ? 
-            <h3>Next Application status check in {this.state.recheckPeriod} seconds</h3> : ''
+            <h6>Next Application status check in - {this.state.recheckPeriod} seconds</h6> : ''
           }  
           
           {this.state.recheckMessages.length > 0 ? 

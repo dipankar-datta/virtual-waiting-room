@@ -10,11 +10,18 @@ export default class App extends React.Component<any, any> {
   render() {
     return (
       <div >
-          <div className='horizontal-center'><h2>Virtual Waiting Room</h2></div>
-          <Switch>
-            <Route path="/" exact component={Home} />
-            <Route path="/wait" component={WaitingRoom} />
-          </Switch>
+          <div style={{backgroundColor: "black", height: "55px"}}>
+            <div className='horizontal-center'>
+              <h3 style={{color: "cornsilk", marginTop: "10px"}}>Virtual Waiting Room</h3>
+            </div>
+          </div>
+
+          <div style={{padding: "20px 20px"}}>
+            <Switch>
+              <Route path="/" exact component={Home} />
+              <Route path="/wait" component={WaitingRoom} />
+            </Switch>
+          </div>
       </div>
     );
   }
