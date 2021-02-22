@@ -80,7 +80,7 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
     let coloredStatus;
     switch(status) {
       case 'FAILED' : coloredStatus = <div className="alert alert-danger" role="alert">{messagePrefix}</div>; break;
-      case 'BUSY' : coloredStatus = <div className="alert alert-warning" role="alert">{messagePrefix}</div>; break;
+      case 'BUSY' : coloredStatus = <div className="alert alert-info" role="alert">{messagePrefix}</div>; break;
       case 'SUCCESS' : coloredStatus = <div className="alert alert-success" role="alert">{messagePrefix}</div>; break;
     }
     const statusMessage = + coloredStatus;
