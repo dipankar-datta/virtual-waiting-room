@@ -7,7 +7,7 @@ interface WaitingRoomState {
   redirectUrl?: string;
   redirectHostname?: string;
   recheckStatus?: string;
-  recheckMessages: string[];
+  recheckMessages: any[];
   rechecking: boolean;
 }
 
@@ -73,8 +73,18 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
 
   setErrorMessage = (status: 'SUCCESS' | 'BUSY' | 'FAILED') => {
     const recheckMessages = Object.assign([], this.state.recheckMessages);
-    const statusMessage = 'Last checked at: ' + (new Date().toLocaleTimeString()) + ' - Status: ' + status;
-    recheckMessages.push(statusMessage);
+    const messagePrefix =  (recheckMessages.length + 1) 
+                          + ' - Last checked at: ' 
+                          + (new Date().toLocaleTimeString()) 
+                          + ' - Status: ' + status;
+    let coloredStatus;
+    switch(status) {
+      case 'FAILED' : coloredStatus = <div className="alert alert-danger" role="alert">{messagePrefix}</div>; break;
+      case 'BUSY' : coloredStatus = <div className="alert alert-warning" role="alert">{messagePrefix}</div>; break;
+      case 'SUCCESS' : coloredStatus = <div className="alert alert-success" role="alert">{messagePrefix}</div>; break;
+    }
+    const statusMessage = + coloredStatus;
+    recheckMessages.push(coloredStatus);
     this.setState({...this.state, recheckMessages, recheckPeriod: this.RECHECK_PERIOD})
   }
 
@@ -119,13 +129,16 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
           }  
           
           {this.state.recheckMessages.length > 0 ? 
-            (<table>
-              <tbody>
-                {this.state.recheckMessages.slice().reverse().map((message, index) => 
-                <tr>{(this.state.recheckMessages.length - index)} - {message}</tr>)}
-              </tbody>
-            </table>
-            ) : ''
+            (
+              <div style={{marginTop: "20px"}}>
+                <table>
+                <tbody>
+                  {this.state.recheckMessages.slice().reverse().map((message, index) => 
+                  <tr><td>{message} </td></tr>)}
+                </tbody>
+                </table>              
+              </div>
+            ) : ''            
           } 
       </div>
     );
