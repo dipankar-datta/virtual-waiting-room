@@ -9,6 +9,7 @@ interface WaitingRoomState {
   recheckStatus?: string;
   recheckMessages: any[];
   rechecking: boolean;
+  resourceStatus?: 'busy' | 'unavailable'
 }
 
 export default class WaitingRoom extends React.Component<any, WaitingRoomState> {
@@ -24,7 +25,8 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
     this.state = {
       recheckPeriod: this.RECHECK_PERIOD,
       recheckMessages: [],
-      rechecking: true
+      rechecking: true,
+      resourceStatus: 'busy'
     };
   }  
 
@@ -43,8 +45,9 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
       redirectInfo = JSON.parse(redirectInfo);
     }
     const redirectUrl =  redirectInfo['redirectUrl'];
+    const resourceStatus =  redirectInfo['appCheckStatus'];
     const redirectHostname = new URL(redirectUrl).origin
-    this.setState({...this.state, redirectUrl, redirectHostname}) ;
+    this.setState({...this.state, redirectUrl, resourceStatus, redirectHostname}) ;
     this.startRecheck();
   }
 
@@ -62,29 +65,29 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
             clearInterval(this.intervalRef);
             this.redirectBack();
           } else {
-            this.setErrorMessage('BUSY');
+            this.setErrorMessage('busy');
           }
         })
       }).catch(err => {
-        this.setErrorMessage('FAILED');
+        this.setErrorMessage('failed');
       });
     } 
   }
 
-  setErrorMessage = (status: 'SUCCESS' | 'BUSY' | 'FAILED') => {
+  setErrorMessage = (status: 'success' | 'busy' | 'failed') => {
     const recheckMessages = Object.assign([], this.state.recheckMessages);
     const messagePrefix =  (recheckMessages.length + 1) 
                           + ' - Last checked at: ' 
                           + (new Date().toLocaleTimeString()) 
-                          + ' - Status: ' + status;
-    let coloredStatus;
+                          + ' - Status: ' + status.toUpperCase();
+    let checkStatusClass;    
     switch(status) {
-      case 'FAILED' : coloredStatus = <div className="alert alert-danger" role="alert">{messagePrefix}</div>; break;
-      case 'BUSY' : coloredStatus = <div className="alert alert-info" role="alert">{messagePrefix}</div>; break;
-      case 'SUCCESS' : coloredStatus = <div className="alert alert-success" role="alert">{messagePrefix}</div>; break;
+      case 'failed' : checkStatusClass = "alert alert-danger"; break;
+      case 'busy' : checkStatusClass = "alert alert-info"; break;
+      case 'success' : checkStatusClass = "alert alert-success"; break;
     }
-    const statusMessage = + coloredStatus;
-    recheckMessages.push(coloredStatus);
+    const statusMessage = <div className={checkStatusClass} role="alert">{messagePrefix}</div>;
+    recheckMessages.push(statusMessage);
     this.setState({...this.state, recheckMessages, recheckPeriod: this.RECHECK_PERIOD})
   }
 
@@ -101,15 +104,23 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
   render() {    
   
     return (
+
+
       <div>
           <div>
-            <h3>Resource Busy</h3>
-            <p>Your requested application is currently busy. Once the requested application is available, you will be redirected back.</p>
+            <h3>Resource {this.state.resourceStatus === 'unavailable' ? 'Unavailable' : 'Busy'}</h3>
+            <p>Your requested application is 
+              currently {this.state.resourceStatus}. Once the requested application 
+              is available, you will be redirected back.
+            </p>
           </div>
           <h6>Requested application URL: {this.state.redirectUrl}</h6>          
           <div className='horizontal-center' style={{padding: "20px"}}>
             <div className='horizontal-center'>
-            <button type="button" className="btn btn-danger" onClick={this.redirectBack} >Go Back</button> &nbsp;&nbsp;
+            <button 
+              type="button" 
+              className="btn btn-danger" 
+              onClick={this.redirectBack} >Go Back</button> &nbsp;&nbsp;
 
             {
               this.state.rechecking ? 
@@ -133,8 +144,8 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
               <div style={{marginTop: "20px"}}>
                 <table>
                 <tbody>
-                  {this.state.recheckMessages.slice().reverse().map((message, index) => 
-                  <tr><td>{message} </td></tr>)}
+                  {this.state.recheckMessages.slice().reverse().map((message) => 
+                  <tr><td>{message}</td></tr>)}
                 </tbody>
                 </table>              
               </div>
