@@ -46,9 +46,11 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
     }
     const redirectUrl =  redirectInfo['redirectUrl'];
     const resourceStatus =  redirectInfo['appCheckStatus'];
-    const redirectHostname = new URL(redirectUrl).origin
-    this.setState({...this.state, redirectUrl, resourceStatus, redirectHostname}) ;
-    this.startRecheck();
+    const redirectHostname = new URL(redirectUrl).origin;
+    setTimeout(() => {
+      this.setState({...this.state, redirectUrl, resourceStatus, redirectHostname}) ;
+      this.startRecheck();
+    }, 200);
   }
 
   checkApplicationStressStatus = () => {
@@ -62,15 +64,20 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
 
       fetch(url)
       .then((res: Response) => {
-        res.json().then((status: boolean) => {
-          if (status) {           
-            clearInterval(this.intervalRef);
-            this.redirectBack();
-          } else {
-            this.setState({...this.state, rechecking: 'start'});
-            this.setErrorMessage('busy');
-          }
-        })
+        if (res.ok) {
+          res.json().then((status: boolean) => {
+            if (status) {           
+              clearInterval(this.intervalRef);
+              this.redirectBack();
+            } else {
+              this.setState({...this.state, rechecking: 'start'});
+              this.setErrorMessage('busy');
+            }
+          })
+        } else {
+          this.setState({...this.state, rechecking: 'start'});
+          this.setErrorMessage('failed');
+        }        
       }).catch(err => {
         this.setState({...this.state, rechecking: 'start'});
         this.setErrorMessage('failed');
@@ -130,12 +137,17 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
 
             {
               ['start', 'checking'].indexOf(this.state.rechecking) >= 0 ? 
-              <button  type="button" className="btn btn-danger" onClick={this.stopRecheck} >Stop Recheck</button>
+              <button  
+                type="button" 
+                className="btn btn-danger" 
+                onClick={this.stopRecheck} >Stop Recheck</button>
               :
-              <button  type="button" className="btn btn-danger" onClick={this.startRecheck} >Start Recheck</button>
+              <button  
+                type="button" 
+                className="btn btn-danger" 
+                onClick={this.startRecheck} >Start Recheck</button>
             }
-
-            &nbsp;&nbsp;
+            &nbsp;&nbsp;            
             <button 
               type="button" 
               className="btn btn-danger" 
