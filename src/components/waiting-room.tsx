@@ -8,7 +8,7 @@ interface WaitingRoomState {
   redirectHostname?: string;
   recheckStatus?: string;
   recheckMessages: any[];
-  rechecking: boolean;
+  rechecking: 'stop' | 'start' | 'checking';
   resourceStatus?: 'busy' | 'unavailable'
 }
 
@@ -25,7 +25,7 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
     this.state = {
       recheckPeriod: this.RECHECK_PERIOD,
       recheckMessages: [],
-      rechecking: true,
+      rechecking: 'start',
       resourceStatus: 'busy'
     };
   }  
@@ -55,9 +55,11 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
 
     if (this.state.recheckPeriod > 0) {
       this.setState({...this.state, recheckPeriod: (this.state.recheckPeriod - 1)})
-    } else if (this.state.recheckPeriod === 0) {
-      
+    } else if (this.state.recheckPeriod === 0 && this.state.rechecking === 'start') {
+
+      this.setState({...this.state, rechecking: 'checking'});
       const url = this.state.redirectHostname + this.STRESS_CHECK_PATH;
+
       fetch(url)
       .then((res: Response) => {
         res.json().then((status: boolean) => {
@@ -65,12 +67,14 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
             clearInterval(this.intervalRef);
             this.redirectBack();
           } else {
+            this.setState({...this.state, rechecking: 'start'});
             this.setErrorMessage('busy');
           }
         })
       }).catch(err => {
+        this.setState({...this.state, rechecking: 'start'});
         this.setErrorMessage('failed');
-      });
+      });      
     } 
   }
 
@@ -93,19 +97,21 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
 
   stopRecheck = () => {
     clearInterval(this.intervalRef);
-    this.setState({...this.state, rechecking: false});
+    this.setState({...this.state, rechecking: 'stop'});
   }
 
   startRecheck = () => {
     this.intervalRef = setInterval(this.checkApplicationStressStatus, 1000);
-    this.setState({...this.state, rechecking: true, recheckPeriod: this.RECHECK_PERIOD});
+    this.setState({...this.state, rechecking: 'start', recheckPeriod: this.RECHECK_PERIOD});
+  }
+
+  clearLog = () => {
+    this.setState({...this.state, recheckMessages: []})
   }
   
   render() {    
   
     return (
-
-
       <div>
           <div>
             <h3>Resource {this.state.resourceStatus === 'unavailable' ? 'Unavailable' : 'Busy'}</h3>
@@ -123,11 +129,17 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
               onClick={this.redirectBack} >Go Back</button> &nbsp;&nbsp;
 
             {
-              this.state.rechecking ? 
+              ['start', 'checking'].indexOf(this.state.rechecking) >= 0 ? 
               <button  type="button" className="btn btn-danger" onClick={this.stopRecheck} >Stop Recheck</button>
               :
               <button  type="button" className="btn btn-danger" onClick={this.startRecheck} >Start Recheck</button>
             }
+
+            &nbsp;&nbsp;
+            <button 
+              type="button" 
+              className="btn btn-danger" 
+              onClick={this.clearLog} >Clear Log</button>
             
             </div>
             
@@ -135,8 +147,11 @@ export default class WaitingRoom extends React.Component<any, WaitingRoomState> 
               <h6>Only for demonstration</h6>
             </div>            
           </div>       
-          {this.state.rechecking ? 
+          {this.state.rechecking === 'start' ? 
             <h6>Next Application status check in - {this.state.recheckPeriod} seconds</h6> : ''
+          } 
+          {this.state.rechecking === 'checking' ? 
+            <h6>Checking application</h6> : ''
           }  
           
           {this.state.recheckMessages.length > 0 ? 
